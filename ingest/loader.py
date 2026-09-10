@@ -15,9 +15,7 @@ import requests
 
 def fetch_reference(url):
     """Fetch the drinks reference list from the running API."""
-    # DEFECT: no timeout. Week 2 told you what happens on the day the
-    # server accepts the connection and then says nothing at all.
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()
     return response.json()
 
