@@ -1,0 +1,10 @@
+order_id,customer_id,drink_id,store_id,qty,ordered_at,status,reason
+201,5,3,2,0,2026-03-04T09:00:00+05:30,placed,qty must be greater than zero
+202,5,3,2,-2,2026-03-04T09:00:00+05:30,placed,qty must be greater than zero
+203,5,3,2,two,2026-03-04T09:00:00+05:30,placed,qty is not an integer
+204,5,3,2,1,not-a-date,placed,ordered_at is not a valid timestamp
+205,5,3,2,1,2026-03-04T09:00:00+05:30,exploded,invalid status
+206,5,99999,2,1,2026-03-04T09:00:00+05:30,placed,drink_id does not exist
+207,,3,2,1,2026-03-04T09:00:00+05:30,placed,customer_id is empty
+208,5,3,2,1,2026-03-04T09:00:00+05:30,,row is too short
+209,5,3,2,1,2026-03-04T09:00:00+05:30,placed,row is too long
