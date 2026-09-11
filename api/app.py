@@ -8,7 +8,7 @@ import os
 import time
 import psycopg
 from flask import Flask, jsonify, request
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 from api.config import API_KEY, DB_DSN, PAGE_SIZE_DEFAULT, PAGE_SIZE_MAX
 
@@ -25,9 +25,10 @@ LATENCY = Histogram(
     ["endpoint"],
 )
 
-# TODO (Phase 4): add a Gauge called capstone_orders_in_flight.
-
-
+ORDERS_IN_FLIGHT = Gauge(
+    "capstone_orders_in_flight",
+    "Number of orders currently in flight",
+)
 def db():
     return psycopg.connect(os.environ.get("DB_DSN", DB_DSN))
 
@@ -56,16 +57,24 @@ def metrics():
 @app.get("/orders")
 def orders():
     start = time.time()
-    code, msg = authorised(request)
-    if code != 200:
-        REQUESTS.labels("/orders", "GET", code).inc()
-        return jsonify(error=msg), code
+    ORDERS_IN_FLIGHT.inc()
 
-    # TODO (Phase 2): pagination.
-    #   ?page= and ?per_page=, per_page capped at PAGE_SIZE_MAX.
-    #   The response MUST report count (this page) and total (all rows).
-    #   Week 2 taught you why those are different numbers.
-    raise NotImplementedError("Phase 2: implement pagination")
+    try:
+        code, msg = authorised(request)
+
+        if code != 200:
+            REQUESTS.labels("/orders", "GET", code).inc()
+            LATENCY.labels("/orders").observe(time.time() - start)
+            return jsonify(error=msg), code
+
+        # TODO (Phase 2): pagination.
+        #   ?page= and ?per_page=, per_page capped at PAGE_SIZE_MAX.
+        #   The response MUST report count (this page) and total (all rows).
+        #   Week 2 taught you why those are different numbers.
+        raise NotImplementedError("Phase 2: implement /orders")
+
+    finally:
+        ORDERS_IN_FLIGHT.dec()
 
 
 @app.get("/stats")

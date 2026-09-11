@@ -1,0 +1,19 @@
+A Counter would be wrong for in-flight requests because in-flight requests can increase and decrease; a Counter can only increase, while a Gauge can move up and down.
+
+Query 1 — Request rate over 5 minutes by endpoint:
+sum by (endpoint) (rate(capstone_requests_total[5m]))
+
+Output:
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{"endpoint":"/orders"},"value":[1789059581.540,"0.06780419504554747"]}]}}
+
+Query 2 — Error rate as a percentage of all requests:
+100 * sum(rate(capstone_requests_total{status=~"4..|5.."}[5m])) / sum(rate(capstone_requests_total[5m]))
+
+Output:
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1789059666.062,"100"]}]}}
+
+Query 3 — 95th percentile latency:
+histogram_quantile(0.95, sum by (le) (rate(capstone_request_seconds_bucket[5m])))
+
+Output:
+{"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1789060301.197,"0.00475"]}]}}
