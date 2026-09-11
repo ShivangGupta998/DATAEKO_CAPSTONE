@@ -39,8 +39,8 @@ variable "environments" {
 # DEFECT: count over a list. Remove the middle environment and read the plan.
 # Today's session measured exactly what this does.
 resource "aws_s3_bucket" "env" {
-  count  = length(var.environments)
-  bucket = "${var.student}-capstone-${var.environments[count.index]}"
+  for_each = toset(var.environments)
+  bucket   = "${var.student}-capstone-${each.value}"
 }
 
 resource "aws_security_group" "api" {
@@ -70,4 +70,6 @@ resource "aws_security_group" "api" {
   }
 }
 
-output "buckets" { value = aws_s3_bucket.env[*].bucket }
+output "buckets" {
+  value = values(aws_s3_bucket.env)[*].bucket
+}
