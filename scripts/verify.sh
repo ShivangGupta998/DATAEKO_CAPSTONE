@@ -5,6 +5,13 @@
 # Writes evidence/RECEIPT.json. Commit that file.
 set -u
 
+if [ -f .venv/bin/activate ] && [ -z "${VIRTUAL_ENV:-}" ]; then
+  # shellcheck disable=SC1091
+  source .venv/bin/activate
+fi
+export PATH="$HOME/.local/bin:$PWD/.venv/bin:${PATH}"
+export PYTHONPATH="${PWD}:${PYTHONPATH:-}"
+
 LIVE=0; [ "${1:-}" = "--live" ] && LIVE=1
 PASS=0; FAIL=0; SKIP=0
 RESULTS=""
