@@ -47,12 +47,11 @@ resource "aws_security_group" "api" {
   name        = "${var.student}-capstone-api"
   description = "capstone api"
 
-  # DEFECT: the whole internet can reach SSH on this box.
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   ingress {
