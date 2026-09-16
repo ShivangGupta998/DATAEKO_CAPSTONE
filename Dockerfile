@@ -1,11 +1,23 @@
-FROM python:3.13-slim
+# Stage 1: Build dependencies in virtualenv
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
-# Copy dependencies first for Docker layer caching
-COPY api/requirements.txt api/requirements.txt
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
+COPY api/requirements.txt api/requirements.txt
 RUN pip install --no-cache-dir -r api/requirements.txt
+
+COPY . .
+
+# Stage 2: Production minimal runtime
+FROM python:3.13-slim AS runner
+
+WORKDIR /app
+
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 COPY . .
 
