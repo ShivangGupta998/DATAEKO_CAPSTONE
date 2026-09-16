@@ -5,6 +5,9 @@ __pycache__/
 .terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.backup
+infra/terraform.tfstate*
+*.zip
 data/staging/
 evidence/rejected.csv.tmp
 .DS_Store
+
