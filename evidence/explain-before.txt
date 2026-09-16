@@ -1,0 +1,15 @@
+EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 4242;
+
+                                                     QUERY PLAN                                                      
+---------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..6668.29 rows=20 width=36) (actual time=5.795..71.587 rows=20 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   ->  Parallel Seq Scan on orders  (cost=0.00..5666.29 rows=8 width=36) (actual time=12.544..51.580 rows=7 loops=3)
+         Filter: (customer_id = 4242)
+         Rows Removed by Filter: 133527
+ Planning Time: 0.986 ms
+ Execution Time: 71.711 ms
+
+Index: None (Baseline query on unindexed customer_id column).
+Without an index on customer_id, the planner has no access path other than a Parallel Seq Scan scanning all 400,000 heap pages. The high estimated cost of over 6,600 units reflects the disk I/O required to inspect every tuple in the table.

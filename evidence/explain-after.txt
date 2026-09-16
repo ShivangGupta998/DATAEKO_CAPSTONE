@@ -1,0 +1,14 @@
+EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 4242;
+
+                                                           QUERY PLAN                                                            
+---------------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on orders  (cost=4.58..80.34 rows=20 width=36) (actual time=0.105..0.338 rows=20 loops=1)
+   Recheck Cond: (customer_id = 4242)
+   Heap Blocks: exact=20
+   ->  Bitmap Index Scan on idx_orders_customer_id  (cost=0.00..4.57 rows=20 width=0) (actual time=0.078..0.079 rows=20 loops=1)
+         Index Cond: (customer_id = 4242)
+ Planning Time: 1.007 ms
+ Execution Time: 0.599 ms
+
+Index: idx_orders_customer_id (B-tree index on orders(customer_id) from migration 001).
+The planner changed its mind because the B-tree index provides direct O(log N) lookup of the 20 matching tuples, reducing the estimated query cost from 6,668.29 down to 80.34 and accelerating execution from 71.7 ms to 0.599 ms (over 100x faster).
