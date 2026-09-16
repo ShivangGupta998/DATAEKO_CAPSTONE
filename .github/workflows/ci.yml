@@ -12,10 +12,9 @@ jobs:
           python-version: "3.13"
       - run: pip install -r api/requirements.txt -r ingest/requirements.txt
       - run: pip install pytest
-      # DEFECT: a credential, in a file, in a public repository.
       - name: run tests
         env:
-          API_KEY: "dataeko-capstone-2026-secret"
+          API_KEY: ${{ secrets.API_KEY }}
         run: pytest -v --junitxml=report.xml
       # TODO (Phase 5): upload report.xml as an artifact.
 

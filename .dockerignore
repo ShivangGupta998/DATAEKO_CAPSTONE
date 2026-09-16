@@ -1,0 +1,13 @@
+.git
+.gitignore
+.gitattributes
+.venv
+infra/.terraform
+**/.terraform
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+data/
+evidence/
