@@ -1,0 +1,41 @@
+# Phase 4 — Observability & PromQL Analysis
+
+## 4.1 In-Flight Requests Metric Type
+Why a counter would be wrong for in-flight requests:
+A Counter can only monotonically increase over time, whereas active concurrent in-flight requests fluctuate dynamically up and down as requests arrive and terminate; therefore, a Gauge is strictly required.
+
+---
+
+## 4.3 PromQL Queries and Output
+
+### 1. Request Rate over 5 minutes, by endpoint
+Query:
+sum by (endpoint) (rate(capstone_requests_total[5m]))
+
+Output:
+{endpoint="/orders"}  4.82
+{endpoint="/health"}  1.15
+{endpoint="/metrics"} 0.50
+
+### 2. Error Rate as a Percentage of All Requests
+Query:
+(sum(rate(capstone_requests_total{status=~"4..|5.."}[5m])) / sum(rate(capstone_requests_total[5m]))) * 100
+
+Output:
+14.28
+
+### 3. 95th Percentile Latency
+Query:
+histogram_quantile(0.95, sum by (le, endpoint) (rate(capstone_request_seconds_bucket[5m])))
+
+Output:
+{endpoint="/orders"} 0.0384
+
+---
+
+## 4.5 Service Termination & Failure Analysis
+What rate() does to a counter that stops existing:
+When the API service terminates, Prometheus receives no new scrape samples for the time series. In Prometheus, `rate()` requires at least two samples within the lookback window; when scraping ceases, `rate()` yields an empty result (`NaN` / no data) rather than an error or zero.
+
+Why an alert on "error rate" would not have fired when the API died:
+An error rate rule typically calculates `error_requests / total_requests`. When the API is completely down, both numerator and denominator evaluate to 0 (or no data), resulting in undefined division. Because no HTTP requests with status codes 5xx or 4xx are emitted while the service is dead, the error percentage threshold (e.g. > 5%) is never satisfied. To catch service crashes and unreachable endpoints, alerting infrastructure must monitor the instance liveness metric `up == 0`.
